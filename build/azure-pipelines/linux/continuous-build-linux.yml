@@ -10,7 +10,7 @@ steps:
 - task: NodeTool@0
   inputs:
     versionSpec: "12.13.0"
-- task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@4
+- task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
   inputs:
     versionSpec: "1.x"
 - task: 1ESLighthouseEng.PipelineArtifactCaching.RestoreCacheV1.RestoreCache@1
