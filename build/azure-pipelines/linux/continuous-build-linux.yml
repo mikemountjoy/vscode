@@ -10,10 +10,10 @@ steps:
 - task: NodeTool@0
   inputs:
     versionSpec: "12.13.0"
-- task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@2
+- task: geeklearningio.gl-vsts-tasks-yarn.yarn-installer-task.YarnInstaller@3
   inputs:
     versionSpec: "1.x"
-- task: 1ESLighthouseEng.PipelineArtifactCaching.RestoreCacheV1.RestoreCache@1
+- task: 1ESLighthouseEng.PipelineArtifactCaching.RestoreCacheV1.RestoreCache@2
   inputs:
     keyfile: '.yarnrc, remote/.yarnrc, **/yarn.lock, !**/node_modules/**/yarn.lock, !**/.*/**/yarn.lock'
     targetfolder: '**/node_modules, !**/node_modules/**/node_modules'
@@ -22,7 +22,7 @@ steps:
     CHILD_CONCURRENCY=1 yarn --frozen-lockfile
   displayName: Install Dependencies
   condition: and(succeeded(), ne(variables['CacheRestored'], 'true'))
-- task: 1ESLighthouseEng.PipelineArtifactCaching.SaveCacheV1.SaveCache@1
+- task: 1ESLighthouseEng.PipelineArtifactCaching.SaveCacheV1.SaveCache@2
   inputs:
     keyfile: '.yarnrc, remote/.yarnrc, **/yarn.lock, !**/node_modules/**/yarn.lock, !**/.*/**/yarn.lock'
     targetfolder: '**/node_modules, !**/node_modules/**/node_modules'
