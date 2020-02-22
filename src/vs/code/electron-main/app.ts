@@ -588,8 +588,11 @@ export class CodeApplication extends Disposable {
 
 		// Create a URL handler to open file URIs in the active window
 		const environmentService = accessor.get(IEnvironmentService);
+		const logService = this.logService;
+		let codeWindows: ICodeWindow[] | undefined = undefined;
 		urlService.registerHandler({
-			async handleURL(uri: URI, options?: IOpenURLOptions): Promise<boolean> {
+			handleURL(uri: URI, options?: IOpenURLOptions): Promise<boolean> {
+				logService.info('[open-in-desktop] handleURL', uri.toString(), options);
 
 				// Catch file/remote URLs
 				if ((uri.authority === Schemas.file || uri.authority === Schemas.vscodeRemote) && !!uri.path) {
@@ -623,13 +626,13 @@ export class CodeApplication extends Disposable {
 					}
 
 					if (urisToOpen.length > 0) {
-						windowsMainService.open({ context: OpenContext.API, cli, urisToOpen, gotoLineMode: true });
+						codeWindows = windowsMainService.open({ context: OpenContext.API, cli, urisToOpen, gotoLineMode: true });
 
-						return true;
+						return Promise.resolve(true);
 					}
 				}
 
-				return false;
+				return Promise.resolve(false);
 			}
 		});
 
@@ -646,6 +649,8 @@ export class CodeApplication extends Disposable {
 			urlService.registerHandler({
 				async handleURL(uri: URI, options?: IOpenURLOptions): Promise<boolean> {
 					if (windowsMainService.getWindowCount() === 0) {
+						logService.info('[open-in-desktop] handleURL EMPTY WINDOW', uri.toString(), options);
+
 						const cli = { ...environmentService.args };
 						const [window] = windowsMainService.open({ context: OpenContext.API, cli, forceEmpty: true, gotoLineMode: true });
 
@@ -667,6 +672,13 @@ export class CodeApplication extends Disposable {
 		const urls = args['open-url'] ? args._urls : [];
 		const urlListener = new ElectronURLListener(urls || [], urlService, windowsMainService, this.environmentService);
 		this._register(urlListener);
+
+		if (codeWindows) {
+			logService.info('[open-in-desktop] returning early and NOT opening window');
+			return codeWindows;
+		}
+
+		logService.info('[open-in-desktop] continuing to open first window');
 
 		// Open our first window
 		const macOpenFiles: string[] = (<any>global).macOpenFiles;
